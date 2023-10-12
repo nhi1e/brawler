@@ -10,7 +10,7 @@ SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("monster vs skull")
+pygame.display.set_caption("Street Fighter")
 
 #set framerate
 clock = pygame.time.Clock()
@@ -28,44 +28,51 @@ round_over = False
 ROUND_OVER_COOLDOWN = 2000
 
 #define fighter variables
-MONSTER_SIZE = 64 #50x50px
+MONSTER_SIZE = 64 
 MONSTER_SCALE = 4
 MONSTER_OFFSET = [20, 4]
 MONSTER_DATA = [MONSTER_SIZE, MONSTER_SCALE, MONSTER_OFFSET]
-SKULL_SIZE = 64  #64x64px
+SKULL_SIZE = 64  
 SKULL_SCALE = 4
-SKULL_OFFSET = [20, 11] #[20, 14.5]
+SKULL_OFFSET = [20, 11]
 SKULL_DATA = [SKULL_SIZE, SKULL_SCALE, SKULL_OFFSET]
 
 #load music and sounds
-monster_attack_fx = pygame.mixer.Sound("assets/monster_attack.mp3")
+monster_attack_fx = pygame.mixer.Sound("assets/sounds/monster_attack.mp3")
 monster_attack_fx.set_volume(0.5)
-skull_attack_fx = pygame.mixer.Sound("assets/skull_attack.mp3")
+skull_attack_fx = pygame.mixer.Sound("assets/sounds/skull_attack.mp3")
 skull_attack_fx.set_volume(0.5)
-monster_jump_fx = pygame.mixer.Sound("assets/monster_jump.mp3")
+monster_jump_fx = pygame.mixer.Sound("assets/sounds/monster_jump.mp3")
 monster_jump_fx.set_volume(0.5)
-skull_jump_fx = pygame.mixer.Sound("assets/skull_jump.mp3")
+skull_jump_fx = pygame.mixer.Sound("assets/sounds/skull_jump.mp3")
 skull_jump_fx.set_volume(0.5)
-victory_fx = pygame.mixer.Sound("assets/victory.mp3")
-victory_fx.set_volume(0.75)
+death_fx = pygame.mixer.Sound("assets/sounds/death.mp3")
+death_fx.set_volume(0.75)
+start_fx = pygame.mixer.Sound("assets/sounds/start.mp3")
+start_fx.set_volume(0.75)
+summary_fx = pygame.mixer.Sound("assets/sounds/summary.mp3")
+home_fx = pygame.mixer.Sound("assets/sounds/home.mp3")
+count_fx = pygame.mixer.Sound("assets/sounds/countdown.mp3")
+
 
 #load background image
-bg_image = pygame.image.load("assets/background.png").convert_alpha()
+home_image = pygame.image.load("assets/graphics/home_page.png").convert_alpha()
+bg_image = pygame.image.load("assets/graphics/background.png").convert_alpha()
 bg_image = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-bg_image2 = pygame.image.load("assets/background2.png").convert_alpha()
+bg_image2 = pygame.image.load("assets/graphics/background2.png").convert_alpha()
 bg_image2 = pygame.transform.scale(bg_image2, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
 #load sprite sheet
-monster_sheet = pygame.image.load("assets/monster.png").convert_alpha()
-skull_sheet = pygame.image.load("assets/skull.png").convert_alpha()
+monster_sheet = pygame.image.load("assets/graphics/monster.png").convert_alpha()
+skull_sheet = pygame.image.load("assets/graphics/skull.png").convert_alpha()
 #define number of steps in each animation
 MONSTER_ANIMATION_STEPS = [4, 5, 6, 8, 0, 8]
 SKULL_ANIMATION_STEPS = [4, 4, 4, 8, 0, 7]
 
 #define font
-count_font = pygame.font.Font("assets/rainyhearts.ttf", 80)
-score_font = pygame.font.Font("assets/rainyhearts.ttf", 30)
+count_font = pygame.font.Font("assets/fonts/rainyhearts.ttf", 80)
+score_font = pygame.font.Font("assets/fonts/rainyhearts.ttf", 30)
 
 #function for drawing text
 def draw_text(text, font, text_color, x, y):
@@ -112,10 +119,8 @@ class Button():
         pos = pygame.mouse.get_pos()
         #check mouse over  button
         if self.rect.collidepoint(pos):
-            #print('hover')
             if pygame.mouse.get_pressed()[0]==1 and self.clicked==False:
                 self.clicked=True
-                print('clicked')
                 action = True
         
         if pygame.mouse.get_pressed()[0]==0:
@@ -166,6 +171,7 @@ while True:
 
     if intro_screen:
         screen.fill(GREEN)
+        draw_bg(home_image)
         screen.blit(text_surface, text_rect)
 
         if counter<speed*len(message):
@@ -189,6 +195,7 @@ while True:
             intro_count = 4
             message_index = 0
             count = 0
+            start_fx.play()
             fighter_1 = Fighter(1, 200, 310, False, MONSTER_DATA, monster_sheet, MONSTER_ANIMATION_STEPS, monster_attack_fx, monster_jump_fx)
             fighter_2 = Fighter(2, 700, 310, True, SKULL_DATA, skull_sheet, SKULL_ANIMATION_STEPS, skull_attack_fx, skull_jump_fx)
  
@@ -214,6 +221,7 @@ while True:
             #update countdown timer
             if (pygame.time.get_ticks() - last_count_update) >= 1000:
                 intro_count -= 1
+                count_fx.play()
                 last_count_update = pygame.time.get_ticks()
                 
 
@@ -231,12 +239,12 @@ while True:
                 score[1] += 1
                 round_over = True
                 round_over_time = pygame.time.get_ticks()
-                fighter_2.jump == True
+                death_fx.play()
             elif fighter_2.alive == False:
                 score[0] += 1
                 round_over = True
                 round_over_time = pygame.time.get_ticks()
-                fighter_1.jump == True
+                death_fx.play()
         else:
             # option for another round
             for event in pygame.event.get():
@@ -246,13 +254,14 @@ while True:
                         game_active=True
                         round_over = False
                         intro_count = 4
+                        start_fx.play()
                         fighter_1 = Fighter(1, 200, 310, False, MONSTER_DATA, monster_sheet, MONSTER_ANIMATION_STEPS, monster_attack_fx, monster_jump_fx)
                         fighter_2 = Fighter(2, 700, 310, True, SKULL_DATA, skull_sheet, SKULL_ANIMATION_STEPS, skull_attack_fx, skull_jump_fx)
 
 
 
             draw_text("VICTORY!", count_font, "WHITE", SCREEN_WIDTH/2, SCREEN_HEIGHT/3)
-            victory_fx.play()
+            
 
             #after cooldown, display options
             if pygame.time.get_ticks() - round_over_time>ROUND_OVER_COOLDOWN:
@@ -268,6 +277,7 @@ while True:
                     message_index = 0
                     counter = 0
                     intro_screen = True
+                    home_fx.play()
                     
 
                 elif summary_btn.draw():
@@ -277,6 +287,7 @@ while True:
                     final_score_p2 = score[1]
                     round_over = False
                     summary_screen = True
+                    summary_fx.play()
 
     elif summary_screen:
         draw_bg(bg_image2)
@@ -297,6 +308,7 @@ while True:
                 message_index = 0
                 counter = 0
                 intro_screen = True
+                home_fx.play()
    
 
     #update display

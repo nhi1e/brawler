@@ -19,10 +19,9 @@ class Fighter():
         self.attacking = False
         self.attack_sound = attack_sound
         self.jump_sound = jump_sound
-        #self.attack_type = 0
         self.attack_cooldown = 0
         self.hit = False
-        self.health = 10 #100
+        self.health = 100
         self.alive = True
 
     def load_images(self, sprite_sheet, animation_steps):
@@ -170,7 +169,8 @@ class Fighter():
             if attacking_rect.colliderect(target.rect):
                 target.health -= 10    
                 target.hit = True
-            #pygame.draw.rect(surface, ("RED"), attacking_rect)
+
+
 
     def update_action(self, new_action):
         #check if if new action has more/less frames then current
